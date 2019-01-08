@@ -2,10 +2,8 @@ import {
     Component,
     ContentChildren,
     ElementRef,
-    EventEmitter,
     Input,
     OnDestroy,
-    Output,
     QueryList,
     ViewChild,
     ViewEncapsulation,
@@ -52,10 +50,10 @@ export interface MouseLocation {
 export class ContextMenuComponent implements OnDestroy {
     @Input() public menuClass = "";
     @ContentChildren(ContextMenuItemDirective) public menuItems: QueryList<ContextMenuItemDirective>;
-    @ViewChild('menu') public menuElement: ElementRef;
+    // @ViewChild('menu') public menuElement: ElementRef;
     public visibleMenuItems: ContextMenuItemDirective[] = [];
 
-    private _item: any;
+    item: any;
     private subscription: Subscription = new Subscription();
 
     constructor(
@@ -75,24 +73,9 @@ export class ContextMenuComponent implements OnDestroy {
         if (contextMenu && contextMenu !== this) {
             return;
         }
-        this._item = item;
-
-        this.setVisibleMenuItems();
-        this._contextMenuService.openContextMenu({ ...menuEvent, menuItems: this.visibleMenuItems, menuClass: this.menuClass });
+        this.item = item;
+        
+        this._contextMenuService.openContextMenu({ ...menuEvent, menuItems: this.menuItems.toArray(), menuClass: this.menuClass });
     }
 
-    public isMenuItemVisible(menuItem: ContextMenuItemDirective): boolean {
-        return this.evaluateIfFunction(menuItem.visible);
-    }
-
-    public setVisibleMenuItems(): void {
-        this.visibleMenuItems = this.menuItems.filter(menuItem => this.isMenuItemVisible(menuItem));
-    }
-
-    public evaluateIfFunction(value: any): any {
-        if (value instanceof Function) {
-            return value(this._item);
-        }
-        return value;
-    }
 }

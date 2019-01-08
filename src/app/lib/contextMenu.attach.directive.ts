@@ -13,7 +13,7 @@ export class ContextMenuAttachDirective {
 
     @HostListener('contextmenu', ['$event'])
     public onContextMenu(event: MouseEvent): void {
-
+        
         this.contextMenuService.show.next({
             contextMenu: this.contextMenu,
             event,

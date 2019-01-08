@@ -63,7 +63,8 @@ export class ContextMenuService {
     ) { }
 
     public openContextMenu(context: IContextMenuContext) {
-        const { anchorElement, event, parentContextMenu } = context;
+        const { anchorElement, event } = context;
+        console.log('opening menu', context);
 
         // if (!parentContextMenu) {
         const mouseEvent = event as MouseEvent;
@@ -98,7 +99,7 @@ export class ContextMenuService {
             ;
         this.overlays = [this.overlay.create({
             positionStrategy,
-            panelClass: 'ngx-contextmenu',
+            panelClass: 'contextmenu',
             scrollStrategy: this.scrollStrategy.close(),
         })];
         this.attachContextMenu(this.overlays[0], context);
@@ -142,22 +143,8 @@ export class ContextMenuService {
         (<OverlayRefWithContextMenu>overlay).contextMenu = contextMenuContent.instance;
 
         const subscriptions: Subscription = new Subscription();
-        subscriptions.add(contextMenuContent.instance.execute.asObservable()
-            .subscribe((executeEvent) => this.closeAllContextMenus({ eventType: 'execute', ...executeEvent })));
         subscriptions.add(contextMenuContent.instance.closeAllMenus.asObservable()
             .subscribe((closeAllEvent) => this.closeAllContextMenus({ eventType: 'cancel', ...closeAllEvent })));
-        // subscriptions.add(contextMenuContent.instance.closeLeafMenu.asObservable()
-        //   .subscribe(closeLeafMenuEvent => this.destroyLeafMenu(closeLeafMenuEvent)));
-        // subscriptions.add(contextMenuContent.instance.openSubMenu.asObservable()
-        //   .subscribe((subMenuEvent: IContextMenuContext) => {
-        //     this.destroySubMenus(contextMenuContent.instance);
-        //     if (!subMenuEvent.contextMenu) {
-        //       contextMenuContent.instance.isLeaf = true;
-        //       return;
-        //     }
-        //     contextMenuContent.instance.isLeaf = false;
-        //     this.show.next(subMenuEvent);
-        //   }));
         contextMenuContent.onDestroy(() => {
             menuItems.forEach(menuItem => menuItem.isActive = false);
             subscriptions.unsubscribe();
@@ -166,6 +153,8 @@ export class ContextMenuService {
     }
 
     public closeAllContextMenus(closeEvent: CloseContextMenuEvent): void {
+        console.log('closeing', closeEvent);
+
         if (this.overlays) {
             this.overlays.forEach((overlay, index) => {
                 overlay.detach();
@@ -175,16 +164,16 @@ export class ContextMenuService {
         this.overlays = [];
     }
 
-    public getLastAttachedOverlay(): OverlayRefWithContextMenu {
-        let overlay: OverlayRef = this.overlays[this.overlays.length - 1];
-        while (this.overlays.length > 1 && overlay && !overlay.hasAttached()) {
-            overlay.detach();
-            overlay.dispose();
-            this.overlays = this.overlays.slice(0, -1);
-            overlay = this.overlays[this.overlays.length - 1];
-        }
-        return overlay;
-    }
+    // public getLastAttachedOverlay(): OverlayRefWithContextMenu {
+    //     let overlay: OverlayRef = this.overlays[this.overlays.length - 1];
+    //     while (this.overlays.length > 1 && overlay && !overlay.hasAttached()) {
+    //         overlay.detach();
+    //         overlay.dispose();
+    //         this.overlays = this.overlays.slice(0, -1);
+    //         overlay = this.overlays[this.overlays.length - 1];
+    //     }
+    //     return overlay;
+    // }
 
     // public destroyLeafMenu({ exceptRootMenu, event }: CloseLeafMenuEvent = {}): void {
     //   if (this.isDestroyingLeafMenu) {
